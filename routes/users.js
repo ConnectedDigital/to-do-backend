@@ -1,6 +1,5 @@
 const express = require('express');
 const _ = require('lodash');
-const bcrypt = require('bcrypt');
 
 const {User} = require('../models/user');
 const auth = require('../middleware/auth');
@@ -29,10 +28,7 @@ router.post('/', async (req, res) => {
         return res.status(400).send('User already exists.');
 
     user = new User(req.body);
-
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(user.password, salt);
-
+    user.password = user.hashPassword(user.password);
     const token = user.generateToken();
 
     user.save()

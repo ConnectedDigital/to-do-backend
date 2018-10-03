@@ -1,6 +1,6 @@
 const express = require('express');
+const passport = require('passport');
 const Joi = require('joi');
-const bcrypt = require('bcrypt');
 
 const {User} = require('../models/user');
 
@@ -11,16 +11,30 @@ router.post('/', async (req, res) => {
     if (error)
         return res.status(400).send(error.details[0].message);
 
-    let user = await User.findOne({email: req.body.email});
-    if (!user)
-        return res.status(400).send('Invalid e-mail or password.');
+    // let user = await User.findOne({email: req.body.email});
+    // if (!user)
+    //     return res.status(400).send('Invalid e-mail or password.');
+    //
+    // if (!user.validatePassword(req.body.password))
+    //     return res.status(400).send('Invalid e-mail or password.');
 
-    const validPassword = await bcrypt.compare(req.body.password, user.password);
-    if (!validPassword)
-        return res.status(400).send('Invalid e-mail or password.');
+    passport.authenticate('local', (err, user, info) => {
+        if (err)
+            return res.status(500).send(err);
+        if (!user)
+            return res.status(500).send(info);
 
-    const token = user.generateToken();
-    res.send(token);
+        req.logIn(user, (err) => {
+            if (err)
+                return res.status(500).send(err);
+
+            const token = user.generateToken();
+            res.send(token);
+        });
+    })(req, res);
+
+    // const token = user.generateToken();
+    // res.send(token);
 });
 
 function validate(req) {

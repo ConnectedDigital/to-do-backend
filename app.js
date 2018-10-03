@@ -1,5 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const passport = require('passport');
+const session = require('express-session');
 const morgan = require('morgan');
 
 const users = require('./routes/users');
@@ -14,6 +16,22 @@ mongoose.connect('mongodb://localhost/todo', { useNewUrlParser: true })
 
 app.use(express.json());
 app.use(morgan('common'));
+
+app.use(session({
+    name: 'Session',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 3600000,
+        httpOnly: false,
+        secure: false
+    },
+    secret: 'secret'
+}));
+
+require('./config/passport');
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use('/api/users', users);
 app.use('/api/todos', todos);

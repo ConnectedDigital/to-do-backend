@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const config = require('config');
 
 const userSchema = mongoose.Schema({
@@ -21,7 +22,17 @@ const userSchema = mongoose.Schema({
         required: true
     }
 });
-userSchema.methods.generateToken = function () {
+
+userSchema.methods.hashPassword = function(password) {
+    const salt = bcrypt.genSaltSync(10);
+    return bcrypt.hashSync(password, salt);
+};
+
+userSchema.methods.validatePassword = function(password) {
+    return bcrypt.compareSync(password, this.password);
+};
+
+userSchema.methods.generateToken = function() {
     return jwt.sign({_id: this._id, admin: this.admin}, config.get('key'));
 };
 
