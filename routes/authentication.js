@@ -29,7 +29,7 @@ router.post('/', async (req, res) => {
                 return res.status(500).send(err);
 
             const token = user.generateToken();
-            res.send(token);
+            res.json({token});
         });
     })(req, res);
 

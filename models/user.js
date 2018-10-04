@@ -23,17 +23,17 @@ const userSchema = mongoose.Schema({
     }
 });
 
-userSchema.methods.hashPassword = function(password) {
-    const salt = bcrypt.genSaltSync(10);
-    return bcrypt.hashSync(password, salt);
+userSchema.methods.hashPassword = async function(password) {
+    const salt = await bcrypt.genSalt(10);
+    return bcrypt.hash(password, salt);
 };
 
-userSchema.methods.validatePassword = function(password) {
-    return bcrypt.compareSync(password, this.password);
+userSchema.methods.validatePassword = async function(password) {
+    return bcrypt.compare(password, this.password);
 };
 
 userSchema.methods.generateToken = function() {
-    return jwt.sign({_id: this._id, admin: this.admin}, config.get('key'));
+    return jwt.sign({_id: this._id, username: this.username}, config.get('key'));
 };
 
 const User = mongoose.model('User', userSchema);
